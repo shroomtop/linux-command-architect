@@ -1,0 +1,541 @@
+<!--LEGAL-DNA:{"jurisdiction":"US/MN/Baxter","export_tag":"EAR99","spdx":"MIT","artifact_time":1751496596781,"def_pub":"OIN","consent_req":true,"city":"Baxter"}-->
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <title>Command Architect · Shroomtop™</title>
+
+  <meta name="theme-color" content="#00E5FF">
+
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://cdn.tailwindcss.com;">
+
+  <script src="https://cdn.tailwindcss.com/3.4.3"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+
+    :root {
+
+      --bg-main: #0A0A0A;
+
+      --bg-glass: rgba(16, 18, 20, 0.75);
+
+      --accent: #00E5FF;
+
+      --accent-dark: #00B8D4;
+
+      --text-primary: #E5E7EB;
+
+      --text-secondary: #9CA3AF;
+
+      --border-color: rgba(0, 229, 255, 0.2);
+
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body { 
+
+      background: var(--bg-main); 
+
+      color: var(--text-primary); 
+
+      font-family: 'Inter', sans-serif;
+
+      min-height: 100svh;
+
+      padding-top: env(safe-area-inset-top);
+
+      padding-bottom: env(safe-area-inset-bottom);
+
+    }
+
+    ::selection { background: var(--accent); color: var(--bg-main); }
+
+    .scrollbar-custom::-webkit-scrollbar { width: 6px; }
+
+    .scrollbar-custom::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 6px;}
+
+    .glass-pane { 
+
+      background: var(--bg-glass); 
+
+      backdrop-filter: blur(24px) saturate(150%); 
+
+      border: 1px solid var(--border-color);
+
+      box-shadow: 0 8px 32px 0 rgba(0, 229, 255, 0.1);
+
+    }
+
+    .main-card {
+
+        max-width: 640px;
+
+        width: 100%;
+
+        margin: 1rem auto;
+
+    }
+
+    .command-btn {
+
+      font-family: 'Roboto Mono', monospace;
+
+      background: rgba(255,255,255,0.05);
+
+      border: 1px solid rgba(255,255,255,0.1);
+
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+      touch-action: manipulation;
+
+    }
+
+    .command-btn:hover { background: rgba(0, 229, 255, 0.1); border-color: var(--accent); transform: translateY(-2px); }
+
+    .command-btn:active { transform: scale(0.96); filter: brightness(1.2); }
+
+    
+
+    .builder-tag {
+
+        font-family: 'Roboto Mono', monospace;
+
+        background: var(--accent);
+
+        color: #000;
+
+        animation: pop-in 0.3s ease-out forwards;
+
+    }
+
+    @keyframes pop-in { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+    .action-btn { transition: all 0.2s ease; }
+
+    .action-btn:active { transform: scale(0.95); }
+
+    .fade-in { animation: fade-in 0.5s ease forwards; }
+
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+    .toast {
+
+        position: fixed;
+
+        bottom: -100px;
+
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        background: var(--accent);
+
+        color: #000;
+
+        padding: 10px 20px;
+
+        border-radius: 9999px;
+
+        font-weight: 600;
+
+        box-shadow: 0 4px 12px rgba(0, 229, 255, 0.4);
+
+        transition: bottom 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.5s ease;
+
+        z-index: 50;
+
+        opacity: 0;
+
+    }
+
+    .toast.show {
+
+        bottom: 30px;
+
+        opacity: 1;
+
+    }
+
+  </style>
+
+</head>
+
+<body class="flex items-center justify-center p-4">
+
+  <div class="main-card glass-pane rounded-3xl p-6 fade-in">
+
+    
+
+    <header class="text-center mb-6">
+
+      <h1 class="text-3xl font-bold tracking-tighter text-white">Command Architect</h1>
+
+      <p class="text-base text-cyan-400">Build terminal workflows with fluid precision.</p>
+
+    </header>
+
+    <div class="mb-4">
+
+      <input id="filterInput" type="text" placeholder="Search commands (e.g., 'git' or 'copy')" class="w-full px-4 py-2 rounded-xl bg-gray-900 border border-transparent focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition text-sm">
+
+    </div>
+
+    <div id="cmdList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-56 overflow-y-auto scrollbar-custom pr-2 mb-6">
+
+      </div>
+
+    <div class="space-y-4">
+
+        <div>
+
+            <label class="font-semibold text-sm text-cyan-400 mb-2 block">Builder</label>
+
+            <div id="builder" class="p-3 min-h-[5rem] rounded-xl bg-gray-900/80 flex flex-wrap gap-2 items-start border border-gray-700">
+
+                <span class="text-gray-500 text-sm italic self-center mx-auto">Click a command above to start...</span>
+
+            </div>
+
+        </div>
+
+        
+
+        <div>
+
+            <label for="cmdOutput" class="font-semibold text-sm text-cyan-400 mb-2 block">Generated Command</label>
+
+            <div class="relative group">
+
+                <pre id="cmdOutput" class="bg-gray-900 text-cyan-300 rounded-xl p-4 text-sm overflow-x-auto scrollbar-custom whitespace-pre-wrap font-mono min-h-[4rem]"></pre>
+
+                <button id="copyBtn" class="action-btn absolute top-2 right-2 bg-gray-700 hover:bg-cyan-600 text-white p-2 rounded-full opacity-50 group-hover:opacity-100 transition-opacity" title="Copy Command">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <div>
+
+            <label for="descOutput" class="font-semibold text-sm text-cyan-400 mb-2 block">Plain English Explanation</label>
+
+            <div id="descOutput" class="bg-gray-900 text-green-300/90 rounded-xl p-4 text-sm min-h-[4rem] border border-gray-800"></div>
+
+        </div>
+
+    </div>
+
+    
+
+    <div class="flex items-center justify-between mt-6">
+
+        <p class="text-xs text-gray-600">MIT License © 2025 Shroomtop Industries™</p>
+
+        <button id="clearBtn" class="action-btn bg-red-800/50 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition">Clear All</button>
+
+    </div>
+
+  </div>
+
+  <div id="toast" class="toast">Copied to clipboard!</div>
+
+<script>
+
+const commands = [
+
+  // Core & File
+
+  {cmd:"ls -la",desc:"List all files and directories in long format"},
+
+  {cmd:"cd",desc:"Change directory"},
+
+  {cmd:"pwd",desc:"Print current working directory"},
+
+  {cmd:"cp -r",desc:"Copy files/directories recursively"},
+
+  {cmd:"mv",desc:"Move or rename files/directories"},
+
+  {cmd:"rm -rf",desc:"Force remove files/directories recursively"},
+
+  {cmd:"mkdir -p",desc:"Create a directory including parent directories"},
+
+  {cmd:"touch",desc:"Create an empty file or update its timestamp"},
+
+  {cmd:"cat",desc:"Display the contents of a file"},
+
+  {cmd:"grep",desc:"Search for a text pattern within files"},
+
+  {cmd:"find . -name",desc:"Find files by name in the current directory"},
+
+  {cmd:"chmod +x",desc:"Make a file executable"},
+
+  // Git
+
+  {cmd:"git clone",desc:"Clone a repository into a new directory"},
+
+  {cmd:"git status",desc:"Show the working tree status"},
+
+  {cmd:"git add .",desc:"Stage all changes in the current directory"},
+
+  {cmd:"git commit -m",desc:"Record changes to the repository with a message"},
+
+  {cmd:"git push",desc:"Update remote refs along with associated objects"},
+
+  {cmd:"git pull",desc:"Fetch from and integrate with another repository"},
+
+  {cmd:"git branch",desc:"List, create, or delete branches"},
+
+  {cmd:"git checkout",desc:"Switch branches or restore working tree files"},
+
+  // GitHub CLI
+
+  {cmd:"gh repo clone",desc:"Clone a GitHub repository"},
+
+  {cmd:"gh repo create",desc:"Create a new repository on GitHub"},
+
+  {cmd:"gh pr create",desc:"Create a pull request"},
+
+  {cmd:"gh pr list",desc:"List pull requests in a repository"},
+
+  {cmd:"gh issue create",desc:"Create an issue"},
+
+  {cmd:"gh auth login",desc:"Authenticate with a GitHub host"},
+
+  // Networking
+
+  {cmd:"curl -O",desc:"Download a file from a URL"},
+
+  {cmd:"wget",desc:"Download files from the web non-interactively"},
+
+  {cmd:"ssh",desc:"Connect to a remote machine via SSH"},
+
+  {cmd:"ping",desc:"Check network connectivity to a host"},
+
+  // System & Process
+
+  {cmd:"ps aux",desc:"Show all running processes"},
+
+  {cmd:"kill -9",desc:"Forcefully terminate a process"},
+
+  {cmd:"df -h",desc:"Show disk space usage in human-readable format"},
+
+  {cmd:"htop",desc:"Interactive process viewer"},
+
+  // Termux
+
+  {cmd:"pkg install",desc:"Install a package (Termux)"},
+
+  {cmd:"pkg upgrade",desc:"Upgrade all installed packages (Termux)"},
+
+  {cmd:"termux-setup-storage",desc:"Set up access to shared storage (Termux)"},
+
+  {cmd:"termux-open",desc:"Open a file or URL (Termux)"},
+
+];
+
+let builder = [];
+
+const elements = {
+
+  cmdList: document.getElementById('cmdList'),
+
+  builderDiv: document.getElementById('builder'),
+
+  cmdOutput: document.getElementById('cmdOutput'),
+
+  descOutput: document.getElementById('descOutput'),
+
+  copyBtn: document.getElementById('copyBtn'),
+
+  clearBtn: document.getElementById('clearBtn'),
+
+  filterInput: document.getElementById('filterInput'),
+
+  toast: document.getElementById('toast'),
+
+};
+
+const renderCmdList = () => {
+
+  const filter = elements.filterInput.value.toLowerCase();
+
+  elements.cmdList.innerHTML = '';
+
+  const filteredCmds = commands.filter(c => c.cmd.toLowerCase().includes(filter) || c.desc.toLowerCase().includes(filter));
+
+  
+
+  filteredCmds.forEach(c => {
+
+    const btn = document.createElement('button');
+
+    btn.textContent = c.cmd;
+
+    btn.title = c.desc;
+
+    btn.className = "command-btn text-cyan-200 rounded-lg px-3 py-2 text-xs shadow-sm whitespace-nowrap";
+
+    btn.onclick = () => {
+
+      builder.push({ ...c, id: Date.now() });
+
+      renderBuilder();
+
+    };
+
+    elements.cmdList.appendChild(btn);
+
+  });
+
+};
+
+const renderBuilder = () => {
+
+  if (builder.length === 0) {
+
+    elements.builderDiv.innerHTML = `<span class="text-gray-500 text-sm italic self-center mx-auto">Click a command above to start...</span>`;
+
+  } else {
+
+    elements.builderDiv.innerHTML = '';
+
+    builder.forEach((c, i) => {
+
+      const tag = document.createElement('div');
+
+      tag.className = "builder-tag flex items-center rounded-full px-3 py-1 text-sm font-semibold";
+
+      tag.innerHTML = `
+
+        <span>${c.cmd}</span>
+
+        <button class="ml-2 text-red-800 hover:text-red-500 transition-colors" title="Remove" onclick="removeBuilderItem(${c.id})">
+
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+
+        </button>`;
+
+      elements.builderDiv.appendChild(tag);
+
+    });
+
+  }
+
+  updateOutputs();
+
+};
+
+window.removeBuilderItem = (id) => {
+
+  builder = builder.filter(item => item.id !== id);
+
+  renderBuilder();
+
+};
+
+const updateOutputs = () => {
+
+  const finalCommand = builder.map(c => c.cmd).join(' && ');
+
+  elements.cmdOutput.textContent = finalCommand;
+
+  let description = '(No command sequence built yet)';
+
+  if (builder.length > 0) {
+
+      description = builder.map(c => c.desc).join(', and then ');
+
+      description = description.charAt(0).toUpperCase() + description.slice(1) + '.';
+
+  }
+
+  elements.descOutput.textContent = description;
+
+};
+
+const showToast = (message) => {
+
+    elements.toast.textContent = message;
+
+    elements.toast.classList.add('show');
+
+    setTimeout(() => {
+
+        elements.toast.classList.remove('show');
+
+    }, 2000);
+
+};
+
+elements.copyBtn.onclick = () => {
+
+  const commandText = elements.cmdOutput.textContent;
+
+  if (commandText) {
+
+    navigator.clipboard.writeText(commandText)
+
+      .then(() => showToast('Copied to clipboard!'))
+
+      .catch(err => {
+
+        showToast('Failed to copy.');
+
+        console.error('Clipboard copy failed: ', err);
+
+      });
+
+  } else {
+
+    showToast('Nothing to copy.');
+
+  }
+
+};
+
+elements.clearBtn.onclick = () => {
+
+  builder = [];
+
+  elements.filterInput.value = '';
+
+  renderCmdList();
+
+  renderBuilder();
+
+};
+
+elements.filterInput.oninput = renderCmdList;
+
+// Initial render
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    renderCmdList();
+
+    renderBuilder();
+
+});
+
+</script>
+
+</body>
+
+</html>
+
